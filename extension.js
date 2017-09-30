@@ -6,7 +6,7 @@ var cryptoUtil = require('./lib/crypto-util');
 var commandExistsSync = require('command-exists').sync;
 var upath = require("upath");
 var isPathInside = require('is-path-inside');
-const CONFIG_NAME = "ftp-simple.json";
+const CONFIG_NAME = "sftp.json";
 
 var outputChannel = null;
 var fastOpenConnectionButton = null;
@@ -71,7 +71,6 @@ function loadFtpSimpleConfig() {
     var result = true;
     var json = vsUtil.getConfig(CONFIG_NAME);
     try {
-        json = cryptoUtil.decrypt(json);
         json = JSON.parse(json);
     } catch (e) {
         vsUtil.error("Check Simple-FTP config file syntax.");
@@ -91,12 +90,9 @@ function loadServerList(source) {
         serversConfig = source;
     }
     if (serversConfig.result) {
-        servers = [];
-        serversConfig.json.forEach(function (element) {
-            if (element.type != "sftp") return;
-            var server = { "name": element.name, "configuration": element };
-            servers.push(server);
-        }, this);
+        
+        servers.push({configuration:serversConfig.json});
+        
         vsUtil.output(outputChannel, "Loaded " + servers.length + " server(s)");
     }
     else {
@@ -139,8 +135,8 @@ function openSSHTerminal(serverName) {
         if (server.configuration.agent !== undefined && server.configuration.agent)
             sshAuthorizationMethod = "agent";
         // Authorization by private key
-        if (server.configuration.privateKey !== undefined && server.configuration.privateKey) {
-            sshCommand += ' -i "' + server.configuration.privateKey + '"';
+        if (server.configuration.privateKeyPath !== undefined && server.configuration.privateKeyPath) {
+            sshCommand += ' -i "' + server.configuration.privateKeyPath + '"';
             sshAuthorizationMethod = "byPrivateKey";
         }
         if (!hasErrors) {
@@ -177,7 +173,12 @@ function getServerByFilePath(filePath) {
     // Find the server that has the project containing this file
     var server = servers.find(function (element, index, array) {
         // If the server does not have any projects, go to the next
-        if (element.configuration.project === undefined) return false;
+        if (element.configuration.host !== undefined) {
+            element.configuration.project = element.configuration.host;
+            element.configuration.name = element.configuration.host;
+        }else {
+            return false;
+        }
         var thisServerMapped = false;
         Object.keys(element.configuration.project).forEach(function (item) {
             // Get project path with fixed drive letter case
