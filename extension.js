@@ -91,7 +91,7 @@ function loadServerList(source) {
     }
     if (serversConfig.result) {
         
-        servers.push({configuration:serversConfig.json});
+        servers.push({"name": serversConfig.json.host,"configuration":serversConfig.json});
         
         vsUtil.output(outputChannel, "Loaded " + servers.length + " server(s)");
     }

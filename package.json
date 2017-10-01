@@ -1,9 +1,9 @@
 {
   "name": "sshextension",
   "displayName": "SSHExtension",
-  "description": "Extension for SSH connections using the ftp-simple settings",
+  "description": "Extension for SSH connections using the sftp settings",
   "version": "0.1.1",
-  "publisher": "kondratiev",
+  "publisher": "joinsito",
   "license": "MIT",
   "engines": {
     "vscode": "^1.10.0"
@@ -37,7 +37,7 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "extensionDependencies": [
-    "humy2833.ftp-simple"
+    "liximomo.sftp"
   ],
   "repository": {
     "type": "git",
